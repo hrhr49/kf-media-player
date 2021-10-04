@@ -9,7 +9,7 @@ const clipValue = (
 
 const useClipedValue = (
   initialValue: number,
-  [min, max]: [number, number],
+  {min, max, step = 0}: {min: number; max: number; step?: number},
 ) => {
   const [value, setRawValue] = useState(clipValue(initialValue, [min, max]));
 
@@ -19,13 +19,13 @@ const useClipedValue = (
       setRawValue(clipValue(newValue, [min, max]));
     }, [min, max]),
 
-    up: useCallback((delta: number)  => {
-      setRawValue((prev) => clipValue(prev + delta, [min, max]));
-    }, [min, max]),
+    up: useCallback(()  => {
+      setRawValue((prev) => clipValue(prev + step, [min, max]));
+    }, [min, max, step]),
 
-    down: useCallback((delta: number)  => {
-      setRawValue((prev) => clipValue(prev - delta, [min, max]));
-    }, [min, max]),
+    down: useCallback(()  => {
+      setRawValue((prev) => clipValue(prev - step, [min, max]));
+    }, [min, max, step]),
 
     min: useCallback(() => {
       setRawValue(min);
@@ -34,6 +34,10 @@ const useClipedValue = (
     max: useCallback(() => {
       setRawValue(max);
     }, [max]),
+
+    default: useCallback(() => {
+      setRawValue(clipValue(initialValue, [min, max]));
+    }, [initialValue, min, max]),
 
   } as const;
 

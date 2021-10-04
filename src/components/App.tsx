@@ -1,4 +1,4 @@
-import React, {useState, useCallback, useContext} from 'react';
+import React, {useState, useContext} from 'react';
 import ReactPlayer from 'react-player/file';
 import {FullScreen, useFullScreenHandle} from 'react-full-screen';
 
@@ -23,23 +23,95 @@ import {
 interface IAppProps {
 };
 
-const App: React.FC<IAppProps> = ({
-}) => {
+const App: React.FC<IAppProps> = (
+) => {
   const [url, setUrl] = useState('');
   const [fullScreen, setFullScreen] = useState(true);
 
-  const [playing, playingCallbacks] = useFlag(true);
-  const [muted, mutedCallbacks] = useFlag(false);
-  const [loop, loopCallbacks] = useFlag(false);
-  const [pip, pipCallbacks] = useFlag(false);
-  const [controls, controlsCallbacks] = useFlag(false);
+  const [
+    playing,
+    {
+      set: playingSet,
+      on: playingOn,
+      off: playingOff,
+      toggle: playingToggle,
+    }
+  ] = useFlag(true);
 
-  const [volume, volumeCallbacks] = useClipedValue(1, [0, 1]);
-  const [playbackRate, playbackRateCallbacks] = useClipedValue(1, [0.1, 4]);
+  const [
+    muted,
+    {
+      on: mutedOn,
+      off: mutedOff,
+      toggle: mutedToggle,
+    }
+  ] = useFlag(false);
 
-  const [played, playedCallbacks] = useClipedValue(0, [0, 1]);
-  const [loaded, loadedCallbacks] = useClipedValue(0, [0, 1]);
-  const [duration, durationCallbacks] = useClipedValue(0, [0, 1]);
+  const [
+    loop,
+    {
+      on: loopOn,
+      off: loopOff,
+      toggle: loopToggle,
+    }
+  ] = useFlag(false);
+
+  const [
+    pip,
+    {
+      on: pipOn,
+      off: pipOff,
+      toggle: pipToggle,
+    }
+  ] = useFlag(false);
+
+  const [
+    controls,
+    {
+      on: controlsOn,
+      off: controlsOff,
+      toggle: controlsToggle,
+    }
+  ] = useFlag(false);
+
+  const [
+    volume,
+    {
+      up: volumeUp,
+      down: volumeDown,
+      default: volumeDefault,
+    }
+  ] = useClipedValue(1, {min: 0, max: 1, step: 0.05});
+
+  const [
+    playbackRate,
+    {
+      up: playbackRateUp,
+      down: playbackRateDown,
+      default: playbackRateDefault,
+    }
+  ] = useClipedValue(1, {min: 0.1, max: 4, step: 0.1});
+
+  const [
+    played,
+    {
+      set: playedSet,
+    }
+  ] = useClipedValue(0, {min: 0, max: 1});
+
+  const [
+    loaded,
+    {
+      set: loadedSet,
+    }
+  ] = useClipedValue(0, {min: 0, max: 1});
+
+  const [
+    duration,
+    {
+      set: durationSet,
+    }
+  ] = useClipedValue(0, {min: 0, max: 1});
 
   const fullScrenHandle = useFullScreenHandle();
   const player = React.useRef<any>();
@@ -78,33 +150,33 @@ const App: React.FC<IAppProps> = ({
       }
     },
 
-    playingOn: playingCallbacks.on,
-    playingOff: playingCallbacks.off,
-    playingToggle: playingCallbacks.toggle,
+    playingOn,
+    playingOff,
+    playingToggle,
 
-    mutedOn: mutedCallbacks.on,
-    mutedOff: mutedCallbacks.off,
-    mutedToggle: mutedCallbacks.toggle,
+    mutedOn,
+    mutedOff,
+    mutedToggle,
 
-    loopOn: loopCallbacks.on,
-    loopOff: loopCallbacks.off,
-    loopToggle: loopCallbacks.toggle,
+    loopOn,
+    loopOff,
+    loopToggle,
 
-    controlsOn: controlsCallbacks.on,
-    controlsOff: controlsCallbacks.off,
-    controlsToggle: controlsCallbacks.toggle,
+    controlsOn,
+    controlsOff,
+    controlsToggle,
 
-    pipOn: pipCallbacks.on,
-    pipOff: pipCallbacks.off,
-    pipToggle: pipCallbacks.toggle,
+    pipOn,
+    pipOff,
+    pipToggle,
 
-    volumeUp: () => volumeCallbacks.up(0.05),
-    volumeDown: () => volumeCallbacks.down(0.05),
-    volumeDefault: () => volumeCallbacks.set(1),
+    volumeUp,
+    volumeDown,
+    volumeDefault,
 
-    playbackRateUp: () => playbackRateCallbacks.up(0.1),
-    playbackRateDown: () => playbackRateCallbacks.down(0.1),
-    playbackRateDefault: () => playbackRateCallbacks.set(1),
+    playbackRateUp,
+    playbackRateDown,
+    playbackRateDefault,
 
     seekForward10Seconds: () => seekBySeconds(10),
     seekBackward10Seconds: () => seekBySeconds(-10),
@@ -154,19 +226,19 @@ const App: React.FC<IAppProps> = ({
           onReady={() => console.log('onReady')}
           onStart={() => console.log('onStart')}
 
-          onPlay={playingCallbacks.on}
-          onEnablePIP={pipCallbacks.on}
-          onDisablePIP={pipCallbacks.off}
-          onPause={playingCallbacks.off}
+          onPlay={playingOn}
+          onEnablePIP={pipOn}
+          onDisablePIP={pipOff}
+          onPause={playingOff}
           onBuffer={() => console.log('onBuffer')}
           onSeek={e => console.log('onSeek', e)}
-          onEnded={() => {playingCallbacks.set(loop)}}
+          onEnded={() => {playingSet(loop)}}
           onError={e => console.log('onError', e)}
           onProgress={({loaded, played}) => {
-            loadedCallbacks.set(loaded);
-            playedCallbacks.set(played);
+            loadedSet(loaded);
+            playedSet(played);
           }}
-          onDuration={durationCallbacks.set}
+          onDuration={durationSet}
 
         />
       </FullScreen>
@@ -175,7 +247,7 @@ const App: React.FC<IAppProps> = ({
           position: 'fixed',
           top: 0,
           left: 0,
-            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          backgroundColor: 'rgba(255, 255, 255, 0.5)',
         }}
       >
         <pre><code>

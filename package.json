@@ -23,6 +23,7 @@
   },
   "scripts": {
     "preinstall": "typesync || :",
+    "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

@@ -147,7 +147,7 @@ interface MatchedItem {
 function useCommandPalette(): ICommandPaletteContext {
   const [inputText, setInputText] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [isOpen, isOpenCallbacks] = useFlag(false);
+  const [isOpen, {on: isOpenOn, off: isOpenOff}] = useFlag(false);
   const [matchedItems, setMatchedItems] = useState<MatchedItem[]>([]);
 
   const commandCallbacksRef = useRef<CommandCallbacks | null>(null);
@@ -158,14 +158,14 @@ function useCommandPalette(): ICommandPaletteContext {
     commandCallbacksRef.current = commandCallbacks;
     setInputText('');
     setSelectedIndex(0);
-    isOpenCallbacks.on();
-  }, []);
+    isOpenOn();
+  }, [isOpenOn]);
 
   const commandPaletteClose = useCallback(() => {
     setInputText('');
     setSelectedIndex(0);
-    isOpenCallbacks.off();
-  }, []);
+    isOpenOff();
+  }, [isOpenOff]);
 
   const commandPaletteToggle = useCallback(({commandCallbacks}: {commandCallbacks: CommandCallbacks}) => {
     if (isOpen) {
@@ -215,11 +215,11 @@ function useCommandPalette(): ICommandPaletteContext {
 
   const commandPaletteContent = (
     <div
-      onMouseDown={isOpenCallbacks.off}
+      onMouseDown={isOpenOff}
     >
       <Modal
         isOpen={isOpen}
-        onRequestClose={isOpenCallbacks.off}
+        onRequestClose={isOpenOff}
         style={customStyles}
         contentLabel="Command Palette"
       >
