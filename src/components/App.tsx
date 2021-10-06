@@ -1,4 +1,4 @@
-import React, {useState, useContext} from 'react';
+import React, {useState, useContext, useRef} from 'react';
 import ReactPlayer from 'react-player/file';
 import {FullScreen, useFullScreenHandle} from 'react-full-screen';
 
@@ -6,8 +6,8 @@ import {
   CommandPaletteContext,
 } from './CommandPaletteContext';
 import {
-  KeybindingsContext,
-} from './KeybindingsContext';
+  defaultKeybindings,
+} from '../keybindings';
 
 import { useKeybindings } from '../hooks/use-keybindings';
 import { useFlag } from '../hooks/use-flag';
@@ -15,16 +15,18 @@ import { useClipedValue } from '../hooks/use-cliped-value';
 
 import {
   CommandCallbacks,
+  COMMANDS,
+  commandToTitle,
 } from '../commands';
-// import {
-//   Keybindings,
-// } from '../keybindings';
 
 interface IAppProps {
 };
 
 const App: React.FC<IAppProps> = (
 ) => {
+  const keybindings = defaultKeybindings;
+
+  const commandCallbacksRef = useRef<CommandCallbacks | null>(null);
   const [url, setUrl] = useState('');
   const [fullScreen, setFullScreen] = useState(true);
 
@@ -45,7 +47,7 @@ const App: React.FC<IAppProps> = (
       off: mutedOff,
       toggle: mutedToggle,
     }
-  ] = useFlag(false);
+  ] = useFlag(true);
 
   const [
     loop,
@@ -72,7 +74,7 @@ const App: React.FC<IAppProps> = (
       off: controlsOff,
       toggle: controlsToggle,
     }
-  ] = useFlag(false);
+  ] = useFlag(true);
 
   const [
     volume,
@@ -81,7 +83,7 @@ const App: React.FC<IAppProps> = (
       down: volumeDown,
       default: volumeDefault,
     }
-  ] = useClipedValue(1, {min: 0, max: 1, step: 0.05});
+  ] = useClipedValue(0.5, {min: 0, max: 1, step: 0.05});
 
   const [
     playbackRate,
@@ -116,15 +118,7 @@ const App: React.FC<IAppProps> = (
   const fullScrenHandle = useFullScreenHandle();
   const player = React.useRef<any>();
 
-  const {
-    commandPaletteOpen,
-    commandPaletteClose,
-    commandPaletteToggle,
-    commandPaletteNextItem,
-    commandPalettePreviousItem,
-    commandPaletteSelect,
-  } = useContext(CommandPaletteContext);
-  const keybindings = useContext(KeybindingsContext);
+  const commandPalette = useContext(CommandPaletteContext);
 
   const seekBySeconds = React.useCallback((seconds: number) => {
     if (player.current !== null) {
@@ -192,16 +186,30 @@ const App: React.FC<IAppProps> = (
     seekTo80Percent: () => seekToFraction(0.8),
     seekTo90Percent: () => seekToFraction(0.9),
 
-    commandPaletteOpen: () => commandPaletteOpen({commandCallbacks}),
-    commandPaletteClose,
-    commandPaletteToggle: () => commandPaletteToggle({commandCallbacks}),
+    commandPaletteOpen: async () => {
+      const items = COMMANDS.map((command) => {
+        return {
+          name: commandToTitle(command),
+          command,
+          keys: keybindings[command],
+        };
+      });
+      const item = await commandPalette.showQuickPick(items);
+      if (item !== null) {
+        const command = item.command;
+        commandCallbacksRef.current?.[command]();
+      }
+      // commandPaletteOpen({commandCallbacks}),
+    },
+    commandPaletteClose: commandPalette.cancelQuickPick,
+    commandPaletteToggle: () => {throw Error('not implemented yet')},
 
-    commandPaletteNextItem,
-    commandPalettePreviousItem,
-
-    commandPaletteSelect, 
+    commandPaletteNextItem: commandPalette.nextItemQuickPick,
+    commandPalettePreviousItem: commandPalette.previousItemQuickPick,
+    commandPaletteSelect: commandPalette.selectItemQuickPick,
   };
 
+  commandCallbacksRef.current = commandCallbacks;
   useKeybindings({keybindings, commandCallbacks});
 
   return (

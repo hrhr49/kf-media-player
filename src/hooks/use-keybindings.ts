@@ -50,9 +50,8 @@ const useKeybindings = ({
     return () => {
       COMMANDS.forEach((command) => {
         const keys = keybindings[command];
-        // TODO
         if (keys) {
-          // mousetrap.unbind(keys);
+          mousetrap.unbind(keys);
         }
       });
     };

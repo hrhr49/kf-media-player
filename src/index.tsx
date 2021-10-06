@@ -7,17 +7,12 @@ import App from './components/App';
 import {
   CommandPaletteProvider,
 } from './components/CommandPaletteContext';
-import {
-  KeybindingsProvider,
-} from './components/KeybindingsContext';
 
 ReactDOM.render(
   <React.StrictMode>
-    <KeybindingsProvider>
-      <CommandPaletteProvider>
-        <App />
-      </CommandPaletteProvider>
-    </KeybindingsProvider>
+    <CommandPaletteProvider>
+      <App />
+    </CommandPaletteProvider>
   </React.StrictMode>,
   document.getElementById('root')
 );
