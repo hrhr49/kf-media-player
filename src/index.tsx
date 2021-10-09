@@ -3,32 +3,12 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import reportWebVitals from './reportWebVitals';
 
-import App from './components/App';
-import {
-  CommandPaletteProvider,
-} from './components/CommandPaletteContext';
-import {
-  InputBoxProvider,
-} from './components/InputBox';
+import {App} from './components/App';
 
-import {
-  defaultKeybindings,
-} from './keybindings';
 
-const Index = () => {
-  return (
-    <CommandPaletteProvider>
-      <InputBoxProvider>
-        <App
-          keybindings={defaultKeybindings}
-        />
-      </InputBoxProvider>
-    </CommandPaletteProvider>
-  );
-}
 ReactDOM.render(
   <React.StrictMode>
-    <Index></Index>
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

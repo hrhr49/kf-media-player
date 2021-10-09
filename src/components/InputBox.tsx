@@ -68,6 +68,7 @@ interface InputBoxPresentationalProps {
   onClose: () => unknown;
   onTextChange: ChangeEventHandler<HTMLInputElement>;
   onMouseDownOutside: MouseEventHandler<HTMLDivElement>;
+  parentSelector?: () => HTMLElement;
 }
 
 const InputBoxPresentational = ({
@@ -77,6 +78,7 @@ const InputBoxPresentational = ({
   onClose,
   onTextChange,
   onMouseDownOutside,
+  parentSelector,
 }: InputBoxPresentationalProps) => {
   return (
     <div onMouseDown={onMouseDownOutside} >
@@ -85,6 +87,7 @@ const InputBoxPresentational = ({
         onRequestClose={onClose}
         style={modalStyles}
         contentLabel="Input Box"
+        parentSelector={parentSelector}
       >
         <input
           autoFocus
@@ -137,9 +140,11 @@ const createInputBoxContext = () => {
   });
 
   const InputBoxProvider = ({
-    children
+    parentSelector,
+    children,
   }: {
-    children: ReactNode,
+    parentSelector: () => HTMLElement;
+    children: ReactNode;
   }) => {
     const deferredRef = useRef<Deferred<string | null> | null>(null);
     const [placeHolder, setPlaceHolder] = useState('');
@@ -225,6 +230,7 @@ const createInputBoxContext = () => {
             onClose={cancelInputBox}
             onTextChange={onTextChange}
             onMouseDownOutside={cancelInputBox}
+            parentSelector={parentSelector}
           />
         }
         {children}

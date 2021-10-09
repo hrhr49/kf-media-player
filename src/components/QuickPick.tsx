@@ -99,6 +99,7 @@ interface QuickPickPresentationalProps<Content extends HasName> {
     item: QuickPickItem<Content>,
     isSelected: boolean,
   ) => ReactNode;
+  parentSelector?: () => HTMLElement;
 }
 
 const QuickPickPresentational = <Item extends HasName>({
@@ -111,6 +112,7 @@ const QuickPickPresentational = <Item extends HasName>({
   onTextChange,
   onMouseDownOutside,
   renderItem,
+  parentSelector,
 }: QuickPickPresentationalProps<Item>) => {
   return (
     <div onMouseDown={onMouseDownOutside} >
@@ -119,6 +121,7 @@ const QuickPickPresentational = <Item extends HasName>({
         onRequestClose={onClose}
         style={modalStyles}
         contentLabel="Command Palette"
+        parentSelector={parentSelector}
       >
         {
           title &&
@@ -199,8 +202,10 @@ const createQuickPickContext = <Item extends HasName>({
   });
 
   const QuickPickProvider = ({
+    parentSelector,
     children
   }: {
+    parentSelector?: () => HTMLElement,
     children: ReactNode,
   }) => {
     const deferredRef = useRef<Deferred<Item | null> | null>(null);
@@ -289,6 +294,7 @@ const createQuickPickContext = <Item extends HasName>({
             onTextChange={onTextChange}
             onMouseDownOutside={cancelQuickPick}
             renderItem={renderItem}
+            parentSelector={parentSelector}
           />
         }
         {children}
