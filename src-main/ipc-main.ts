@@ -9,6 +9,9 @@ import {getInputFile} from './env';
 import {
   IPC_CHANNELS,
 } from '../src-common/ipc-common';
+import {
+  SUPPORTED_EXTENSIONS_WITH_COMMA,
+} from '../src-common/media';
 
 import type {
   IpcApi,
@@ -24,15 +27,7 @@ const ipcMainApi: IpcApi = {
 
     const extension = path.extname(inputFile);
 
-    const supportedExtensions = [
-      '.3gp', '.avi', '.mov',
-      '.mp4', '.m4v', '.m4a',
-      '.mp3', '.mkv', '.ogv',
-      '.ogm', '.ogg', '.oga',
-      '.webm', '.wav',
-    ];
-
-    if (!supportedExtensions.includes(extension)) {
+    if (!SUPPORTED_EXTENSIONS_WITH_COMMA.includes(extension)) {
       throw Error(`input file extension is not supported ${extension}`);
     }
     const mimeType = mime.lookup(extension);
