@@ -1,7 +1,4 @@
 import {
-  ReactElement,
-  Context,
-  Provider,
   useState,
   useRef,
   createContext,
@@ -10,7 +7,7 @@ import {
   ChangeEventHandler,
   MouseEventHandler,
 } from 'react';
-import Modal from 'react-modal';
+import ReactModal from 'react-modal';
 
 import {
   useQuickPickLogic,
@@ -29,6 +26,15 @@ import {
   Deferred,
 } from '../deferred';
 
+import {
+  useKeybindings,
+} from '../hooks/use-keybindings';
+import type {
+  Keys,
+} from '../keybindings';
+
+ReactModal.setAppElement('#root');
+
 const modalStyles = {
   content: {
     top: '50%',
@@ -45,13 +51,22 @@ const modalStyles = {
   } as CSSProperties,
 };
 
+const titleStyle: CSSProperties = {
+  margin: 0,
+  padding: '2px 8px',
+  boxSizing: 'border-box',
+  color: '#333',
+};
+
 const inputStyle: CSSProperties = {
   width: '100%',
   margin: 0,
-  // padding: '4px 8px',
-  padding: 0,
+  padding: '4px 8px',
+  // padding: 0,
   fontSize: '1.2em',
   boxSizing: 'border-box',
+  border: 'solid 2px orange',
+  color: '#333',
 };
 
 const listStyle: CSSProperties = {
@@ -59,6 +74,7 @@ const listStyle: CSSProperties = {
   listStyleType: 'none',
   margin: 0,
   padding: 0,
+  color: '#333',
 };
 
 const listItemStyle: CSSProperties = {
@@ -67,9 +83,12 @@ const listItemStyle: CSSProperties = {
   margin: 0,
   borderBottom: '1px solid #aaa',
   boxSizing: 'border-box',
+  color: '#333',
 };
 
 interface QuickPickPresentationalProps<Content extends HasName> {
+  title: string;
+  placeHolder: string;
   isOpen: boolean;
   selectedIndex: number;
   items: QuickPickItem<Content>[];
@@ -83,6 +102,8 @@ interface QuickPickPresentationalProps<Content extends HasName> {
 }
 
 const QuickPickPresentational = <Item extends HasName>({
+  title,
+  placeHolder,
   isOpen,
   items,
   selectedIndex,
@@ -93,16 +114,21 @@ const QuickPickPresentational = <Item extends HasName>({
 }: QuickPickPresentationalProps<Item>) => {
   return (
     <div onMouseDown={onMouseDownOutside} >
-      <Modal
+      <ReactModal
         isOpen={isOpen}
         onRequestClose={onClose}
         style={modalStyles}
         contentLabel="Command Palette"
       >
+        {
+          title &&
+          <div style={titleStyle}>{ title }</div>
+        }
         <input
           autoFocus
           onChange={onTextChange}
           type='text'
+          placeholder={placeHolder}
           style={inputStyle}
         ></input>
         <ul style={listStyle}>
@@ -118,19 +144,43 @@ const QuickPickPresentational = <Item extends HasName>({
               ))
           }
         </ul>
-      </Modal>
+      </ReactModal>
     </div>
   );
 };
 
+interface QuickPickOptions {
+  placeHolder?: string;
+  title?: string;
+}
+
 interface QuickPickGlobals<Item extends HasName> {
   isOpen: boolean;
-  showQuickPick: (items: Item[]) => Promise<Item | null>;
+  showQuickPick: (items: Item[], options?: QuickPickOptions) => Promise<Item | null>;
   cancelQuickPick: () => void;
   selectItemQuickPick: () => void;
   nextItemQuickPick: () => void;
   previousItemQuickPick: () => void;
 }
+
+const QUICK_PICK_COMMANDS = [
+  'cancelQuickPick',
+  'selectItemQuickPick',
+  'nextItemQuickPick',
+  'previousItemQuickPick',
+] as const;
+
+type QuickPickAllCommandList = typeof QUICK_PICK_COMMANDS;
+type QuickPickCommand = QuickPickAllCommandList[number];
+
+const quickPickKeybindings: Record<QuickPickCommand, Keys> = {
+  cancelQuickPick: 'esc',
+  selectItemQuickPick: 'enter',
+  nextItemQuickPick: 'down',
+  previousItemQuickPick: 'up',
+};
+
+type QuickPickCallbacks = Record<QuickPickCommand, () => unknown>;
 
 const createQuickPickContext = <Item extends HasName>({
   renderItem,
@@ -155,6 +205,8 @@ const createQuickPickContext = <Item extends HasName>({
   }) => {
     const deferredRef = useRef<Deferred<Item | null> | null>(null);
     const [items, setItems] = useState<Item[]>([]);
+    const [placeHolder, setPlaceHolder] = useState('');
+    const [title, setTitle] = useState('');
 
     const {
       isOpen,
@@ -173,7 +225,15 @@ const createQuickPickContext = <Item extends HasName>({
       chanegeInputText(event.target.value);
     };
 
-    const showQuickPick = (items: Item[]): Promise<Item | null> => {
+    const showQuickPick = (items: Item[], options?: QuickPickOptions): Promise<Item | null> => {
+      const {
+        placeHolder = '',
+        title = '',
+      } = options || {};
+
+      setPlaceHolder(placeHolder);
+      setTitle(title);
+
       setItems(items);
       const deferred = new Deferred<Item | null>();
       deferredRef.current = deferred;
@@ -191,28 +251,46 @@ const createQuickPickContext = <Item extends HasName>({
       deferredRef.current?.resolve(item);
     };
 
-    const quickPickGlobals: QuickPickGlobals<Item> = {
-      isOpen,
-      showQuickPick,
+    const callbacks: QuickPickCallbacks = {
       cancelQuickPick,
       selectItemQuickPick,
       nextItemQuickPick: nextItem,
       previousItemQuickPick: previousItem,
     };
 
+    // keybindings
+    useKeybindings({
+      keybindings: quickPickKeybindings,
+      commandCallbacks: callbacks,
+      commands: QUICK_PICK_COMMANDS,
+      bindGlobal: true,
+      enabled: isOpen,
+    });
+
+    const quickPickGlobals: QuickPickGlobals<Item> = {
+      isOpen,
+      showQuickPick,
+      ...callbacks,
+    };
+
     return (
       <QuickPickContext.Provider
         value={quickPickGlobals}
       >
-        <QuickPickPresentational
-          isOpen={isOpen}
-          items={matchedItems}
-          selectedIndex={selectedIndex}
-          onClose={cancelQuickPick}
-          onTextChange={onTextChange}
-          onMouseDownOutside={cancelQuickPick}
-          renderItem={renderItem}
-        />
+        {
+          isOpen &&
+          <QuickPickPresentational
+            title={title}
+            placeHolder={placeHolder}
+            isOpen={isOpen}
+            items={matchedItems}
+            selectedIndex={selectedIndex}
+            onClose={cancelQuickPick}
+            onTextChange={onTextChange}
+            onMouseDownOutside={cancelQuickPick}
+            renderItem={renderItem}
+          />
+        }
         {children}
       </QuickPickContext.Provider>
     );

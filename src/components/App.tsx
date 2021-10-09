@@ -1,34 +1,82 @@
-import React, {useState, useContext, useRef} from 'react';
-import ReactPlayer from 'react-player/file';
+import React, {useState, useEffect, useContext, useRef} from 'react';
+import ReactPlayer from 'react-player/lazy';
 import {FullScreen, useFullScreenHandle} from 'react-full-screen';
 
 import {
   CommandPaletteContext,
 } from './CommandPaletteContext';
 import {
-  defaultKeybindings,
+  InputBoxContext,
+} from './InputBox';
+
+import {DropFileArea} from './DropFileArea';
+
+import type {
+  Keybindings,
 } from '../keybindings';
 
-import { useKeybindings } from '../hooks/use-keybindings';
-import { useFlag } from '../hooks/use-flag';
-import { useClipedValue } from '../hooks/use-cliped-value';
+import {useKeybindings} from '../hooks/use-keybindings';
+import {useFlag} from '../hooks/use-flag';
+import {useClipedValue} from '../hooks/use-cliped-value';
 
 import {
   CommandCallbacks,
   COMMANDS,
   commandToTitle,
 } from '../commands';
+import type {
+  AllCommandList,
+} from '../commands';
+
+import {
+  ipcRendererApi,
+} from '../ipc-renderer';
 
 interface IAppProps {
+  keybindings: Keybindings;
 };
 
-const App: React.FC<IAppProps> = (
-) => {
-  const keybindings = defaultKeybindings;
-
+const App: React.FC<IAppProps> = ({
+  keybindings,
+}) => {
+  const [url, setUrl] = React.useState('');
   const commandCallbacksRef = useRef<CommandCallbacks | null>(null);
-  const [url, setUrl] = useState('');
   const [fullScreen, setFullScreen] = useState(true);
+
+  const [screenWidth, setScreenWidth] = useState(document.documentElement.clientWidth);
+  const [screenHeight, setScreenHeight] = useState(document.documentElement.clientHeight);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const fileData = await ipcRendererApi.inputFileData();
+        if (fileData) {
+          const {
+            data,
+            mime,
+          } = fileData;
+          const blob = new Blob([data.buffer], {type: mime});
+          const newUrl = URL.createObjectURL(blob);
+          setUrl(newUrl);
+        }
+      } catch (e) {
+        // console.log(e);
+        // do nothing
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setScreenWidth(document.documentElement.clientWidth);
+      setScreenHeight(document.documentElement.clientHeight);
+    };
+    window.addEventListener('resize', onResize);
+    return () => {
+      window.removeEventListener('resize', onResize);
+    }
+  }, []);
+
 
   const [
     playing,
@@ -47,7 +95,7 @@ const App: React.FC<IAppProps> = (
       off: mutedOff,
       toggle: mutedToggle,
     }
-  ] = useFlag(true);
+  ] = useFlag(false);
 
   const [
     loop,
@@ -75,6 +123,15 @@ const App: React.FC<IAppProps> = (
       toggle: controlsToggle,
     }
   ] = useFlag(true);
+
+  const [
+    showInfo,
+    {
+      on: showInfoOn,
+      off: showInfoOff,
+      toggle: showInfoToggle,
+    }
+  ] = useFlag(false);
 
   const [
     volume,
@@ -119,6 +176,24 @@ const App: React.FC<IAppProps> = (
   const player = React.useRef<any>();
 
   const commandPalette = useContext(CommandPaletteContext);
+  const inputBox = useContext(InputBoxContext);
+
+  // const onChange = (e: any) => {
+  //   setUrl(e.target.value);
+  // };
+
+  const loadUrl = React.useCallback((newUrl: string) => {
+    setUrl(newUrl);
+    loadedSet(0);
+    playedSet(0);
+  }, [loadedSet, playedSet]);
+
+  const onDropFile = React.useCallback((file: File) => {
+    // encodeURIComponent
+    const url = URL.createObjectURL(file);
+    console.log({url});
+    loadUrl(url);
+  }, [loadUrl]);
 
   const seekBySeconds = React.useCallback((seconds: number) => {
     if (player.current !== null) {
@@ -164,6 +239,10 @@ const App: React.FC<IAppProps> = (
     pipOff,
     pipToggle,
 
+    showInfoOn,
+    showInfoOff,
+    showInfoToggle,
+
     volumeUp,
     volumeDown,
     volumeDefault,
@@ -187,6 +266,9 @@ const App: React.FC<IAppProps> = (
     seekTo90Percent: () => seekToFraction(0.9),
 
     commandPaletteOpen: async () => {
+      if (inputBox.isOpen || commandPalette.isOpen) {
+        return;
+      }
       const items = COMMANDS.map((command) => {
         return {
           name: commandToTitle(command),
@@ -201,75 +283,139 @@ const App: React.FC<IAppProps> = (
       }
       // commandPaletteOpen({commandCallbacks}),
     },
-    commandPaletteClose: commandPalette.cancelQuickPick,
-    commandPaletteToggle: () => {throw Error('not implemented yet')},
+    loadUrl: async () => {
+      if (inputBox.isOpen || commandPalette.isOpen) {
+        return;
+      }
+      const newUrl = await inputBox.showInputBox({
+        prompt: 'input URL to laod',
+      });
 
-    commandPaletteNextItem: commandPalette.nextItemQuickPick,
-    commandPalettePreviousItem: commandPalette.previousItemQuickPick,
-    commandPaletteSelect: commandPalette.selectItemQuickPick,
+      if (newUrl) {
+        loadUrl(newUrl);
+      }
+    },
   };
 
   commandCallbacksRef.current = commandCallbacks;
-  useKeybindings({keybindings, commandCallbacks});
+  useKeybindings<AllCommandList>({
+    keybindings, commandCallbacks, commands: COMMANDS
+  });
 
+  if (!url) {
+    return (
+      <DropFileArea
+        onDropFile={onDropFile}
+      >
+        <div
+          style={{
+            width: screenWidth,
+            height: screenHeight,
+          }}
+        >
+          <h3>How to Use</h3>
+          <li>command palette: command+shift+p or ctrl+shift+p</li>
+          <li>load URL: command+shift+u or ctrl+shift+u</li>
+          <li>load File: drag and drop media file here</li>
+        </div>
+      </DropFileArea>
+    );
+  }
   return (
-    <>
+    <DropFileArea
+      onDropFile={onDropFile}
+    >
       <FullScreen
         handle={fullScrenHandle}
         onChange={setFullScreen}
       >
-        <ReactPlayer 
-          ref={player}
-          width="100%"
-          height="100%"
-          url="sample.mp4"
-          pip={pip}
-          playing={playing}
-          controls={controls}
-          loop={loop}
-          playbackRate={playbackRate}
-          volume={volume}
-          muted={muted}
+        <div
+          style={
+            fullScreen
+              ? {
+                width: '100%',
+                height: '100%'
+              }
+              : {
+                width: screenWidth,
+                height: screenHeight,
+              }
+          }
+        >
+          <ReactPlayer
+            ref={player}
+            width="100%"
+            height="100%"
+            url={url}
+            pip={pip}
+            playing={playing}
+            controls={controls}
+            loop={loop}
+            playbackRate={playbackRate}
+            volume={volume}
+            muted={muted}
 
-          onReady={() => console.log('onReady')}
-          onStart={() => console.log('onStart')}
+            onReady={() => console.log('onReady')}
+            onStart={() => console.log('onStart')}
 
-          onPlay={playingOn}
-          onEnablePIP={pipOn}
-          onDisablePIP={pipOff}
-          onPause={playingOff}
-          onBuffer={() => console.log('onBuffer')}
-          onSeek={e => console.log('onSeek', e)}
-          onEnded={() => {playingSet(loop)}}
-          onError={e => console.log('onError', e)}
-          onProgress={({loaded, played}) => {
-            loadedSet(loaded);
-            playedSet(played);
-          }}
-          onDuration={durationSet}
+            onPlay={playingOn}
+            onEnablePIP={pipOn}
+            onDisablePIP={pipOff}
+            onPause={playingOff}
+            onBuffer={() => console.log('onBuffer')}
+            onSeek={(e) => console.log('onSeek', e)}
+            onEnded={() => {playingSet(loop)}}
+            onError={(_e) => {
+              alert('sorry, error occurred');
+              // throw e;
+            }}
+            onProgress={({loaded, played}) => {
+              loadedSet(loaded);
+              playedSet(played);
+            }}
+            onDuration={durationSet}
 
-        />
+          />
+        </div>
       </FullScreen>
+      {/* to avoid focus player */}
       <div
         style={{
           position: 'fixed',
           top: 0,
           left: 0,
-          backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          width: '100%',
+          height: '100%',
+          backgroundColor: 'transparent',
         }}
       >
-        <pre><code>
-        state = {
-          JSON.stringify({
-            url,
-            playing, fullScreen, muted,
-            volume, playbackRate, loop,
-            duration, played, loaded,
-          }, null, '  ')
-        }
-        </code></pre>
       </div>
-    </>
+      {
+        showInfo
+        &&
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            backgroundColor: 'rgba(255, 255, 255, 0.5)',
+          }}
+        >
+          <pre><code>
+            state = {
+              JSON.stringify({
+                url,
+                playing, fullScreen, muted,
+                volume, playbackRate, loop,
+                duration, played, loaded,
+                controls, pip,
+                screenWidth, screenHeight,
+              }, null, '  ')
+            }
+          </code></pre>
+        </div>
+      }
+    </DropFileArea>
   );
 }
 

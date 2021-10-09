@@ -31,6 +31,10 @@ const defaultKeybindings: Keybindings = {
   pipOff: null,
   pipToggle: 'p',
 
+  showInfoOn: null,
+  showInfoOff: null,
+  showInfoToggle: 'i',
+
   volumeUp: '+',
   volumeDown: '-',
   volumeDefault: null,
@@ -53,14 +57,8 @@ const defaultKeybindings: Keybindings = {
   seekTo80Percent: '8',
   seekTo90Percent: '9',
 
-  commandPaletteOpen: 'meta+shift+p',
-  commandPaletteClose: 'esc',
-  commandPaletteToggle: null,
-
-  commandPaletteNextItem: 'down',
-  commandPalettePreviousItem: 'up',
-
-  commandPaletteSelect: 'enter',
+  commandPaletteOpen: ['command+shift+p', 'ctrl+shift+p'],
+  loadUrl: ['command+shift+u', 'ctrl+shift+u'],
 };
 
 export {

@@ -16,7 +16,7 @@ const MatchedText: FC<{text: string; matchedIndexes: number[]}> = ({
         .map((s, idx) => {
           const isMatched = matchedIndexSet.has(idx);
           const style: CSSProperties = {
-            color: isMatched ? 'red' : 'black',
+            color: isMatched ? 'coral' : '#333',
             fontWeight: isMatched ? 'bold' : 'normal',
           };
           return (

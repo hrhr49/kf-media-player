@@ -3,33 +3,42 @@ import mousetrap from 'mousetrap';
 import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 
 import type {
-  Keybindings,
+  Keys,
+  // Keybindings,
 } from '../keybindings';
 
-import {
-  COMMANDS,
-} from '../commands';
+// import {
+//   COMMANDS,
+// } from '../commands';
 
-import type {
-  Command,
-  CommandCallbacks,
-} from '../commands';
+// import type {
+//   Command,
+//   CommandCallbacks,
+// } from '../commands';
 
-const useKeybindings = ({
+const useKeybindings = <AllCommandList extends readonly string[]>({
   keybindings,
   commandCallbacks,
+  commands,
+  bindGlobal = false,
+  enabled = true,
 }: {
-  keybindings: Keybindings,
-  commandCallbacks: CommandCallbacks,
+  keybindings: Record<AllCommandList[number], Keys>;
+  commandCallbacks: Record<AllCommandList[number], () => unknown>;
+  commands: AllCommandList;
+  bindGlobal?: boolean;
+  enabled?: boolean;
 }) => {
   const commandCallbacksRef = useRef(commandCallbacks);
   commandCallbacksRef.current = commandCallbacks;
 
   useEffect(() => {
-    COMMANDS.forEach((command: Command) => {
+    if (!enabled) return;
+    commands.forEach((command: AllCommandList[number]) => {
       const keys = keybindings[command];
       if (keys) {
-        if (command.startsWith('commandPalette')) {
+        // console.log('key bind', keys, command);
+        if (bindGlobal) {
           mousetrap.bindGlobal(
             keys,
             () => {
@@ -48,14 +57,15 @@ const useKeybindings = ({
     });
 
     return () => {
-      COMMANDS.forEach((command) => {
+      commands.forEach((command: AllCommandList[number]) => {
         const keys = keybindings[command];
+        // console.log('key unbind', keys, command);
         if (keys) {
           mousetrap.unbind(keys);
         }
       });
     };
-  }, [keybindings]);
+  }, [keybindings, enabled, bindGlobal, commands]);
 
 };
 

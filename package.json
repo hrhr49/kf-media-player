@@ -2,6 +2,32 @@
   "name": "media-player",
   "version": "0.1.0",
   "private": true,
+  "main": "build/src-main/entrypoint.js",
+  "homepage": ".",
+  "author": "hrhr49",
+  "description": "media player with command palette",
+  "workspaces": [
+    "src-common"
+  ],
+  "build": {
+    "extends": null,
+    "mac": {
+      "extendInfo": {
+        "CFBundleDocumentTypes":[
+          {
+            "CFBundleTypeExtensions": ["mp4"],
+            "CFBundleTypeIconFile": "My Awesome Application.icns"
+          }
+        ]
+      }
+    },
+    "files": [
+      "build/**/*"
+    ],
+    "directories": {
+      "buildResources": "assets"
+    }
+  },
   "dependencies": {
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
@@ -10,10 +36,14 @@
     "@types/node": "^12.0.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "electron-is-dev": "^2.0.0",
+    "electron-reload": "^2.0.0-alpha.1",
+    "mime-types": "^2.1.33",
     "mousetrap": "^1.6.5",
     "normalize.css": "^8.0.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-dropzone": "^11.4.2",
     "react-full-screen": "^1.1.0",
     "react-modal": "^3.14.3",
     "react-player": "^2.9.0",
@@ -22,12 +52,21 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
+    "electron": "electron . public/sample.mp4",
+    "electron:no-file": "electron .",
+    "electron:build": "yarn build && tsc -p src-main",
+    "electron:dev": "npm-run-all -p start electron:start",
+    "electron:start": "npm-run-all electron:build electron",
     "preinstall": "typesync || :",
+    "postuninstall": "electron-builder install-app-deps",
     "lint": "eslint 'src/**/*.{js,jsx,ts,tsx}'",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "app:build": "electron-builder",
+    "all:build": "npm-run-all build electron:build app:build",
+    "clean": "rimraf build dist"
   },
   "eslintConfig": {
     "extends": [
@@ -48,9 +87,14 @@
     ]
   },
   "devDependencies": {
+    "@types/mime-types": "^2.1.1",
     "@types/mousetrap": "^1.6.8",
     "@types/react-modal": "^3.12.1",
     "@types/testing-library__jest-dom": "^5.14.1",
+    "electron": "^15.1.1",
+    "electron-builder": "^22.11.7",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.2",
     "typesync": "^0.8.0"
   }
 }

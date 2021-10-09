@@ -23,6 +23,10 @@ const COMMANDS = [
   'pipOff',
   'pipToggle',
 
+  'showInfoOn',
+  'showInfoOff',
+  'showInfoToggle',
+
   'volumeUp',
   'volumeDown',
   'volumeDefault',
@@ -46,16 +50,11 @@ const COMMANDS = [
   'seekTo90Percent',
 
   'commandPaletteOpen',
-  'commandPaletteClose',
-  'commandPaletteToggle',
-
-  'commandPaletteNextItem',
-  'commandPalettePreviousItem',
-
-  'commandPaletteSelect',
+  'loadUrl',
 ] as const;
 
-type Command = (typeof COMMANDS)[number];
+type AllCommandList = typeof COMMANDS;
+type Command = AllCommandList[number];
 // type CommandCallbacks = Partial<Record<Command, () => unknown>>;
 type CommandCallbacks = Record<Command, () => unknown>;
 
@@ -74,6 +73,7 @@ export {
 };
 
 export type {
+  AllCommandList,
   Command,
   CommandCallbacks,
 };

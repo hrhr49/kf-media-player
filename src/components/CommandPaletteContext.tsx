@@ -35,7 +35,7 @@ const renderItem = (
   return (
     <div
       style={{
-        backgroundColor: isSelected ? 'skyblue' : 'white',
+        backgroundColor: isSelected ? '#ddd' : 'white',
         width: '100%',
         height: '100%',
         margin: 0,

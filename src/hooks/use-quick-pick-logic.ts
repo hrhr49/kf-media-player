@@ -86,7 +86,7 @@ const useQuickPickLogic = <Item extends HasName>({
       }
     });
     setMatchedItems(newMatchedItems);
-  }, [inputText, isOpen]);
+  }, [inputText, isOpen, items, textFilter]);
 
   return {
     isOpen,

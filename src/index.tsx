@@ -7,12 +7,28 @@ import App from './components/App';
 import {
   CommandPaletteProvider,
 } from './components/CommandPaletteContext';
+import {
+  InputBoxProvider,
+} from './components/InputBox';
 
+import {
+  defaultKeybindings,
+} from './keybindings';
+
+const Index = () => {
+  return (
+    <CommandPaletteProvider>
+      <InputBoxProvider>
+        <App
+          keybindings={defaultKeybindings}
+        />
+      </InputBoxProvider>
+    </CommandPaletteProvider>
+  );
+}
 ReactDOM.render(
   <React.StrictMode>
-    <CommandPaletteProvider>
-      <App />
-    </CommandPaletteProvider>
+    <Index></Index>
   </React.StrictMode>,
   document.getElementById('root')
 );
