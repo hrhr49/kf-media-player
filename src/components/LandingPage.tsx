@@ -30,6 +30,10 @@ const theadStyle: CSSProperties = {
   padding: '4px',
 };
 
+const thStyle: CSSProperties = {
+  padding: '4px',
+};
+
 const trStyle: CSSProperties = {
   padding: '4px',
 };
@@ -56,8 +60,8 @@ const LandingPage: FC<LandingPageProps> = ({
     <h3>Keybindings</h3>
     <table style={tableStyle} >
       <thead style={theadStyle} >
-        <td>command</td>
-        <td>keybord shortcuts</td>
+        <th style={thStyle} >command</th>
+        <th style={thStyle} >keybord shortcuts</th>
       </thead>
       <tbody>
         {
