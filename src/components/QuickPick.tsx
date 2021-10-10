@@ -33,7 +33,6 @@ import type {
   Keys,
 } from '../keybindings';
 
-ReactModal.setAppElement('#root');
 
 const modalStyles = {
   content: {
@@ -203,11 +202,14 @@ const createQuickPickContext = <Item extends HasName>({
 
   const QuickPickProvider = ({
     parentSelector,
+    modalAppElement = '#root',
     children
   }: {
-    parentSelector?: () => HTMLElement,
-    children: ReactNode,
+    parentSelector?: () => HTMLElement;
+    modalAppElement?: string | HTMLElement;
+    children: ReactNode;
   }) => {
+    ReactModal.setAppElement(modalAppElement);
     const deferredRef = useRef<Deferred<Item | null> | null>(null);
     const [items, setItems] = useState<Item[]>([]);
     const [placeHolder, setPlaceHolder] = useState('');

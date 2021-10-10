@@ -31,6 +31,7 @@ import type {
 import {
   ipcRendererApi,
   unwrapIpcResult,
+  canUseIpcApi,
 } from '../ipc-renderer';
 
 interface KFMediaPlayerProps {
@@ -51,6 +52,7 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
 
   useEffect(() => {
     (async () => {
+      if (!canUseIpcApi()) return;
       try {
         const fileData = unwrapIpcResult(await ipcRendererApi.inputFileData());
         if (fileData) {
@@ -181,14 +183,14 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
   }, [loadUrl]);
 
   const seekBySeconds = React.useCallback((seconds: number) => {
-    if (player.current !== null) {
+    if (player.current) {
       const currentSeconds = player.current.getCurrentTime();
       player.current.seekTo(currentSeconds + seconds, 'seconds');
     }
   }, []);
 
   const seekToFraction = React.useCallback((fraction: number) => {
-    if (player.current !== null) {
+    if (player.current) {
       player.current.seekTo(fraction, 'fraction');
     }
   }, []);
@@ -289,7 +291,9 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
       <DropFileArea
         onDropFile={onDropFile}
       >
-        <LandingPage />
+        <LandingPage
+          keybindings={keybindings}
+        />
       </DropFileArea>
     );
   }
@@ -361,6 +365,8 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
                 volume, playbackRate, loop,
                 duration, played, loaded,
                 controls, pip,
+                canPlay: ReactPlayer.canPlay(url),
+                canEnablePip: ReactPlayer.canEnablePIP(url),
               }, null, '  ')
             }
           </code></pre>

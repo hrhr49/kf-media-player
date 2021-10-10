@@ -7,6 +7,7 @@ import { defaultKeybindings, isPartialKeybindings } from '../keybindings';
 import {
   ipcRendererApi,
   unwrapIpcResult,
+  canUseIpcApi,
 } from '../ipc-renderer';
 
 interface AppProps {
@@ -32,6 +33,7 @@ const App: React.FC<AppProps> = () => {
 
   useEffect(() => {
     (async () => {
+      if (!canUseIpcApi()) return;
       try {
         const rawObj = unwrapIpcResult(await ipcRendererApi.loadKeybindings());
 

@@ -25,8 +25,6 @@ import type {
   Keys,
 } from '../keybindings';
 
-ReactModal.setAppElement('#root');
-
 const modalStyles = {
   content: {
     top: '50%',
@@ -141,11 +139,15 @@ const createInputBoxContext = () => {
 
   const InputBoxProvider = ({
     parentSelector,
+    modalAppElement = '#root',
     children,
   }: {
-    parentSelector: () => HTMLElement;
+    parentSelector?: () => HTMLElement;
+    modalAppElement?: string | HTMLElement;
     children: ReactNode;
   }) => {
+    ReactModal.setAppElement(modalAppElement);
+
     const deferredRef = useRef<Deferred<string | null> | null>(null);
     const [placeHolder, setPlaceHolder] = useState('');
     const [prompt, setPrompt] = useState('');
