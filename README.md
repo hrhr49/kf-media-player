@@ -12,6 +12,17 @@ TODO
 
 TODO
 
+## Configuration
+
+### Keybindings
+
+You can customize keybindings by setting file : `~/.config/kf-media-player/keybindings.json`.
+key name is same as [Mousetrap](https://craig.is/killing/mice)
+
+See [./src/keybindings.ts](./src/keybindings.ts)
+
+TODO: add more information
+
 ## Author
 
 hrhr49

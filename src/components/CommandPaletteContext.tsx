@@ -1,4 +1,7 @@
 import {
+  CSSProperties,
+} from 'react';
+import {
   Keyboard,
 } from './Keyboard';
 
@@ -28,19 +31,27 @@ interface CommandPaletteItem {
   keys: Keys;
 }
 
+const itemStyle: CSSProperties = {
+  backgroundColor: 'white',
+  width: '100%',
+  height: '100%',
+  margin: 0,
+  padding: '4px 8px',
+  boxSizing: 'border-box',
+};
+
+const itemStyleSelected: CSSProperties = {
+  ...itemStyle,
+  backgroundColor: '#ddd',
+};
+
 const renderItem = (
   {name, matchedIndexes, content}: any,
   isSelected: boolean,
 ) => {
   return (
     <div
-      style={{
-        backgroundColor: isSelected ? '#ddd' : 'white',
-        width: '100%',
-        height: '100%',
-        margin: 0,
-        padding: '4px 8px',
-      }}
+      style={isSelected ? itemStyleSelected : itemStyle}
     >
       <MatchedText text={name} matchedIndexes={matchedIndexes} />
       <Keyboard keys={content.keys} />

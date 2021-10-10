@@ -5,6 +5,7 @@ import {
 import type {
   IpcApi,
   IpcChannel,
+  IpcResult,
 } from 'src-common/ipc-common';
 
 const canUseIpcApi = () => IPC_API_NAME in window;
@@ -27,7 +28,18 @@ const createDummyIpcRendererApi = (): IpcApi => {
 
 const ipcRendererApi: IpcApi = canUseIpcApi() ? window[IPC_API_NAME] : createDummyIpcRendererApi();
 
+const unwrapIpcResult = <T>(result: IpcResult<T>): T => {
+  if (result.isOk) {
+    return result.data;
+  } else {
+    // alert(result.err);
+    // error handling is implemented in caller.
+    throw result.err;
+  }
+};
+
 export {
   canUseIpcApi,
   ipcRendererApi,
+  unwrapIpcResult,
 };

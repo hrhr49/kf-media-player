@@ -6,7 +6,7 @@ import {
 } from './CommandPaletteContext';
 import {
   InputBoxContext,
-} from './InputBox';
+} from './InputBoxContext';
 
 import {DropFileArea} from './DropFileArea';
 import {LandingPage} from './LandingPage';
@@ -30,6 +30,7 @@ import type {
 
 import {
   ipcRendererApi,
+  unwrapIpcResult,
 } from '../ipc-renderer';
 
 interface KFMediaPlayerProps {
@@ -47,10 +48,11 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
 }) => {
   const [url, setUrl] = useState('');
   const commandCallbacksRef = useRef<CommandCallbacks | null>(null);
+
   useEffect(() => {
     (async () => {
       try {
-        const fileData = await ipcRendererApi.inputFileData();
+        const fileData = unwrapIpcResult(await ipcRendererApi.inputFileData());
         if (fileData) {
           const {
             data,
@@ -61,8 +63,8 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
           setUrl(newUrl);
         }
       } catch (e) {
-        // console.log(e);
-        // do nothing
+        console.log(e);
+        alert(e);
       }
     })();
   }, []);
@@ -174,7 +176,7 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
 
   const onDropFile = React.useCallback((file: File) => {
     const url = URL.createObjectURL(file);
-    console.log({url});
+    // console.log({url});
     loadUrl(url);
   }, [loadUrl]);
 
@@ -191,7 +193,10 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
     }
   }, []);
 
+  const doNothing = () => {};
   const commandCallbacks: CommandCallbacks = {
+    doNothing,
+
     fullScreenOn,
     fullScreenOff,
     fullScreenToggle,
@@ -254,9 +259,9 @@ const KFMediaPlayer: FC<KFMediaPlayerProps> = ({
         };
       });
       const item = await commandPalette.showQuickPick(items);
-      if (item !== null) {
+      if (item !== null && item.command) {
         const command = item.command;
-        commandCallbacksRef.current?.[command]();
+        commandCallbacksRef.current?.[command]?.();
       }
       // commandPaletteOpen({commandCallbacks}),
     },

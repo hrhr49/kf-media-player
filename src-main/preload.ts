@@ -10,7 +10,7 @@ import type {
 
 const initIpcRenderer = (): IpcApi => {
   // NOTE:
-  // this safe. because main process and renderer process are using same type definition of api;
+  // this is type safe. because main process and renderer process are using same type definition of api;
   const ipcRendererApi: any = {};
   IPC_CHANNELS.forEach((ipcChannel: IpcChannel) => {
     ipcRendererApi[ipcChannel] = (...args: any[]) => ipcRenderer.invoke(ipcChannel, ...args);

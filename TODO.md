@@ -1,5 +1,21 @@
 * fix
-    - if select with empty string in command palette when fullscreen.
-        it will quit fullscreen for a moment.
     - if youtube video has focus, keybinding is not working.
-    - can not close modal one 'esc'. it needs 2 'esc' keys.
+    - kill electron app process when window is closed.
+
+* add
+    - improve fullscreen switching speed. it is very slow...
+    - overwrite youtube video keybindings (or disable `loadUrl` command)
+    - support other platform
+    - formatter
+    - test
+    - CI/CD
+    - load keybindings from json
+    - Storybook
+    - License
+    - README
+    - error handling
+
+* other
+    - change repository to public
+    - Release
+

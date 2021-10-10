@@ -1,4 +1,6 @@
 const COMMANDS = [
+  'doNothing',
+
   'fullScreenOn',
   'fullScreenOff',
   'fullScreenToggle',
@@ -55,6 +57,14 @@ const COMMANDS = [
 
 type AllCommandList = typeof COMMANDS;
 type Command = AllCommandList[number];
+
+const isCommand = (obj: any): obj is Command => {
+  return (
+    typeof obj === 'string'
+    && (COMMANDS as readonly string[]).includes(obj)
+  );
+};
+
 // type CommandCallbacks = Partial<Record<Command, () => unknown>>;
 type CommandCallbacks = Record<Command, () => unknown>;
 
@@ -70,6 +80,7 @@ const commandToTitle = (command: Command): string => {
 export {
   COMMANDS,
   commandToTitle,
+  isCommand,
 };
 
 export type {

@@ -1,5 +1,5 @@
 {
-  "name": "media-player",
+  "name": "kf-media-player",
   "version": "0.1.0",
   "private": true,
   "main": "build/src-main/entrypoint.js",
@@ -19,6 +19,7 @@
     "@types/react-dom": "^17.0.0",
     "electron-is-dev": "^2.0.0",
     "electron-reload": "^2.0.0-alpha.1",
+    "jsonschema": "^1.4.0",
     "mime-types": "^2.1.33",
     "mousetrap": "^1.6.5",
     "normalize.css": "^8.0.1",
@@ -33,7 +34,7 @@
     "web-vitals": "^1.0.1"
   },
   "scripts": {
-    "electron": "electron . public/sample.mp4",
+    "electron": "electron . sample.mp4",
     "electron:no-file": "electron .",
     "electron:build": "yarn build && tsc -p src-main",
     "electron:dev": "npm-run-all -p start electron:start",
