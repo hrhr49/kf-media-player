@@ -1,4 +1,4 @@
-import {substringFilter, regexFilter, fuzzyFilter} from './filters'
+import {substringFilter, regexFilter, fuzzyFilter} from './text-filters'
 
 const testCase = [
   {
