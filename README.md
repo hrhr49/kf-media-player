@@ -6,20 +6,24 @@ this is a media player with keyboard shortcuts and command palette.
 
 ## Feature
 
-TODO
+* Command palette
+* Customizable keybindings
+* Web app and Desktop app are available
+
+## Demo (Web app version)
 
 ## Installation
 
 TODO
 
-## Configuration
+## Configuration 
 
-### Keybindings
+### Keybindings (only Electron app version)
 
 You can customize keybindings by setting file : `~/.config/kf-media-player/keybindings.json`.
 key name is same as [Mousetrap](https://craig.is/killing/mice)
 
-See [./src/keybindings.ts](./src/keybindings.ts)
+See defaultKeybindings in [./src/keybindings.ts](./src/keybindings.ts)
 
 TODO: add more information
 
@@ -36,3 +40,4 @@ TODO
 ## Links
 
 TODO
+

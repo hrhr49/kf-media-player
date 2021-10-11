@@ -8,12 +8,16 @@
     - support other platform
     - formatter
     - test
+        + hooks
+        + components
     - CI/CD
-    - load keybindings from json
     - Storybook
     - License
     - README
     - error handling
+    - configuration page
+    - PWA support
+    - function to load file by FileReader
 
 * other
     - change repository to public
