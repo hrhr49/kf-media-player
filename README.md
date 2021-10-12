@@ -12,6 +12,8 @@ this is a media player with keyboard shortcuts and command palette.
 
 ## Demo (Web app version)
 
+https://hrhr49.github.io/kf-media-player/build/
+
 ## Installation
 
 TODO
