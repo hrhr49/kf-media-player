@@ -4,17 +4,7 @@ import 'mousetrap/plugins/global-bind/mousetrap-global-bind';
 
 import type {
   Keys,
-  // Keybindings,
 } from '../keybindings';
-
-// import {
-//   COMMANDS,
-// } from '../commands';
-
-// import type {
-//   Command,
-//   CommandCallbacks,
-// } from '../commands';
 
 const useKeybindings = <AllCommandList extends readonly string[]>({
   keybindings,
@@ -41,14 +31,16 @@ const useKeybindings = <AllCommandList extends readonly string[]>({
         if (bindGlobal) {
           mousetrap.bindGlobal(
             keys,
-            () => {
+            (event) => {
+              event.preventDefault();
               commandCallbacksRef.current[command]?.();
             }
           );
         } else {
           mousetrap.bind(
             keys,
-            () => {
+            (event) => {
+              event.preventDefault();
               commandCallbacksRef.current[command]?.();
             }
           );
