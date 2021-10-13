@@ -1,7 +1,6 @@
 import {CSSProperties, FC} from 'react';
 import {Keyboard} from './Keyboard';
 
-import {SUPPORTED_EXTENSIONS_WITH_COMMA} from 'src-common/media';
 import {
   COMMANDS,
   commandToTitle,
@@ -53,9 +52,11 @@ const LandingPage: FC<LandingPageProps> = ({
     style={landingPageStyle}
   >
     <h3>How to Use</h3>
-    <li>command palette: <Keyboard keys={keybindings.commandPaletteOpen} /></li>
-    <li>load URL: <Keyboard keys={keybindings.loadUrl} /> (supported URL depends <a href="https://github.com/cookpete/react-player">react-player</a></li>
-    <li>load File: drag and drop media file here (supported file depends your browser)</li>
+    <ul>
+      <li>command palette: <Keyboard keys={keybindings.commandPaletteOpen} /></li>
+      <li>load URL: <Keyboard keys={keybindings.loadUrl} /> (supported URL depends <a href="https://github.com/cookpete/react-player">react-player</a></li>
+      <li>load File: drag and drop media file here (supported file depends your browser)</li>
+    </ul>
 
     <h3>Keybindings</h3>
     <table style={tableStyle} >

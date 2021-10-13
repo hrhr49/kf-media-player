@@ -1,6 +1,5 @@
 import {
   COMMANDS,
-  isCommand,
 } from './commands';
 
 import type {
